@@ -113,7 +113,10 @@ export const coloringStateField = StateField.define<DecorationSet>({
 
 					const decoration = resolvableStateToDecoration[txEffect.value.state ?? 'pending'];
 
-					if (txEffect.value.from === 0 && txEffect.value.to === 0) continue;
+					// Empty resolvables (e.g. `{{ "" }}`) produce zero-length ranges, which
+						// CodeMirror's mark decorations reject. Skipping them here keeps the
+						// rest of this transaction's effects from being dropped by the catch below.
+						if (txEffect.value.from >= txEffect.value.to) continue;
 
 					colorings = colorings.update({
 						add: [decoration.range(txEffect.value.from, txEffect.value.to)],
